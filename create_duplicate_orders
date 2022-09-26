@@ -1,0 +1,57 @@
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from pyspark.sql import SparkSession
+from awsglue.job import Job
+import pyspark
+import logging
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+args = getResolvedOptions(
+    sys.argv,
+    [
+        "JOB_NAME"
+         ]
+)
+confa = (
+    pyspark.SparkConf()
+    .setAppName("test_glue_job")
+
+)
+sc = SparkContext(conf=confa)
+spark = SparkSession.builder.appName("testing_file").getOrCreate()
+glueContext = GlueContext(sc)
+job = Job(glueContext)
+job.init(args["JOB_NAME"], args)
+sc.addPyFile("delta-core_2.12-1.0.0.jar")
+from delta.tables import DeltaTable
+
+input_bucket_path="s3://*****ENTER S3 PATH HERE****/raw_orders.csv"
+output_bucket_path="s3://*****ENTER S3 PATH HERE****/glue-remove-dups_output"
+
+df = spark.read.option("header",True).format("csv").load(input_bucket_path)
+df.show()
+from pyspark.sql.functions import lit,expr,col
+import datetime
+import pytz
+awst_timezone = pytz.timezone('Australia/Perth')
+now = datetime.datetime.now(awst_timezone)
+df=df.withColumn("load_time", lit(now))
+from pyspark.sql.types import StructType,StructField, StringType, IntegerType
+df=df.withColumn("user_id",col("user_id").cast(IntegerType()))
+df=df.withColumn("order_id",col("order_id").cast(IntegerType()))
+df.write.option("mergeSchema","true").format("delta").mode("append").save(output_bucket_path)
+deltaTable = DeltaTable.forPath(spark, output_bucket_path)
+df = deltaTable.toDF()
+deltaTable.history().select ("version","timestamp","operation","operationParameters").show(truncate=False)
+df.show(truncate=False)
+deltaTable.generate("symlink_format_manifest")
+print("here is end of job")
+
+job.commit()
