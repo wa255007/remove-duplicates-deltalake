@@ -1,0 +1,3 @@
+aws iam create-role --role-name Test-Role-glue-min --assume-role-policy-document file://Test-Role-Trust-Policy.json
+aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess --role-name Test-Role-glue-min
+aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole --role-name Test-Role-glue-min
