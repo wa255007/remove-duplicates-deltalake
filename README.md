@@ -1,2 +1,2 @@
 # remove-duplicates-deltalake
-This repository contains code which can be used to removed duplicates from delta lake tables using AWS glue
+This repository contains code which can be used to remove duplicate rows from delta lake tables using AWS glue
