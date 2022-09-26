@@ -1,0 +1,10 @@
+ {
+    "script_path": "C:\\Projects\\YOUR LOCAL SCRIPT PAHT HERE ON WINDOWS\\remove_dups_orderspy",
+    "bucket":"YOUR S3 BUCKET NAME HERE",
+    "bucket_key": "users/glue-remove-dups-scripts",
+    "role": "Test-Role-glue-min",
+    "delta_lake_s3_path": "s3://YOUR S3 PATH HERE/glue-remove-dups_output",
+    "primary_keys": "order_id",
+    "filter_date": "load_time",
+    "delta_lake_jar_path": "s3://YOUR S3 PATH HERE/delta-core_2.12-1.0.0.jar"
+}
